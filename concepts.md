@@ -48,3 +48,43 @@ Reconciliation is the algorithm React uses to determine which DOM elements need 
 - Efficient updates by only modifying what changed
 - Minimizes expensive DOM operations
 - Improves application performance
+
+## Render Phase vs Commit Phase
+
+React's update process is split into two distinct phases:
+
+### Render Phase
+
+During the Render Phase, the Virtual DOM is built using the components and applying the newest state and props. This newly built tree is the **Work-in-Progress Tree**. In the Render Phase, the Current Tree and Work-in-Progress Tree are compared and React figures out what changes need to be done.
+
+**What gets called:**
+- Component function bodies
+- `useState`, `useReducer` hooks and their updaters
+- Lifecycle methods: `getDerivedStateFromProps`, `shouldComponentUpdate`
+
+**Key characteristics:**
+- **Asynchronous** - Can be paused, aborted, or restarted
+- **Interruptible** - Can be interrupted if there is some high-priority task
+- **Pure** - No side effects should occur during this phase
+- **Works in memory** - Only manipulates Virtual DOM, doesn't touch real DOM
+
+### Commit Phase
+
+In the Commit Phase, React takes the list of changes from the Render Phase and applies them to the actual DOM.
+
+**What happens:**
+- Actually updates the real DOM
+- Runs lifecycle methods and effect hooks
+- Updates refs
+
+**What gets called:**
+- `useLayoutEffect` (runs synchronously after DOM mutations)
+- `useEffect` (runs asynchronously after paint)
+- Lifecycle methods: `componentDidMount`, `componentDidUpdate`, `componentWillUnmount`
+- Ref callbacks
+
+**Key characteristics:**
+- **Synchronous** - Cannot be interrupted, must complete in one go
+- **Side effects allowed** - This is where side effects actually run
+- **Touches the real DOM** - Makes actual changes visible to user
+- **Fast** - Only applies minimal changes calculated in Render Phase
