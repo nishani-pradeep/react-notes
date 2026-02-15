@@ -88,3 +88,17 @@ In the Commit Phase, React takes the list of changes from the Render Phase and a
 - **Side effects allowed** - This is where side effects actually run
 - **Touches the real DOM** - Makes actual changes visible to user
 - **Fast** - Only applies minimal changes calculated in Render Phase
+
+---
+
+## React Hooks
+
+For detailed documentation on React Hooks, see [react-hooks.md](./react-hooks.md)
+
+**Covered hooks:**
+- **useState** - State management in functional components
+- **useEffect** - Side effects and lifecycle management
+- **useMemo** - Memoization for performance optimization
+- **useRef** - Refs and mutable values without re-renders
+- **useContext** - Context consumption without prop drilling
+- **useReducer** - Complex state management with reducer pattern

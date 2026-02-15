@@ -358,3 +358,134 @@ function Component() {
 - Perfect for storing values that need to persist but don't affect rendering
 - Common for DOM access, storing timers, tracking previous values
 - Changes to `.current` are immediate (not batched like setState)
+
+---
+
+## useContext
+
+`useContext` is a hook that lets you read and subscribe to context from your component. It's used to pass data through the component tree without passing props manually at every level.
+
+### Basic Syntax:
+```javascript
+const value = useContext(MyContext);
+```
+
+### How it works:
+- Takes a context object (created with `React.createContext`)
+- Returns the current context value for that context
+- The value is determined by the nearest context provider above the component
+- When the provider updates, this hook triggers a re-render with the latest context value
+
+### Example:
+```javascript
+// Create context
+const ThemeContext = React.createContext('light');
+
+// Provider component
+function App() {
+  const [theme, setTheme] = useState('light');
+
+  return (
+    <ThemeContext.Provider value={theme}>
+      <Toolbar />
+      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+        Toggle Theme
+      </button>
+    </ThemeContext.Provider>
+  );
+}
+
+// Consumer component (deep in the tree)
+function ThemedButton() {
+  const theme = useContext(ThemeContext);
+
+  return (
+    <button className={theme}>
+      I am styled by theme context!
+    </button>
+  );
+}
+```
+
+### When to use:
+- Sharing data that can be considered "global" (user info, theme, language)
+- Avoiding prop drilling (passing props through many levels)
+- When multiple components at different levels need the same data
+
+### Key Points:
+- Component calling `useContext` will re-render when context value changes
+- Always re-renders when context changes (even if only using part of the value)
+- For optimization, split context or use `useMemo` on context value
+- Context is not for state management (it just passes data down)
+
+---
+
+## useReducer
+
+`useReducer` is a hook for managing complex state logic. It's an alternative to `useState` and works like Redux reducers.
+
+### Basic Syntax:
+```javascript
+const [state, dispatch] = useReducer(reducer, initialState);
+```
+
+### How it works:
+- Takes a reducer function and initial state
+- Returns current state and a dispatch function
+- Call `dispatch` with an action to update state
+- Reducer function determines how state changes based on the action
+
+### Example:
+```javascript
+// Reducer function
+function counterReducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return { count: state.count + 1 };
+    case 'decrement':
+      return { count: state.count - 1 };
+    case 'reset':
+      return { count: 0 };
+    default:
+      return state;
+  }
+}
+
+// Component using useReducer
+function Counter() {
+  const [state, dispatch] = useReducer(counterReducer, { count: 0 });
+
+  return (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+      <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+    </div>
+  );
+}
+```
+
+### useState vs useReducer:
+
+| Feature | useState | useReducer |
+|---------|----------|------------|
+| Complexity | Simple state | Complex state logic |
+| Related updates | Independent | Multiple related updates |
+| Next state | Directly set | Computed from action |
+| Testing | Harder | Easier (pure function) |
+| Use case | Single values | Objects with multiple sub-values |
+
+### When to use useReducer:
+- State has complex update logic
+- Multiple sub-values that depend on each other
+- Next state depends on previous state
+- Want to separate state logic from component
+- Need to optimize performance (dispatch is stable, doesn't change)
+
+### Key Points:
+- Reducer function must be pure (no side effects)
+- Action is just an object (usually with `type` property)
+- Can pass payload in action: `dispatch({ type: 'add', payload: value })`
+- `dispatch` function identity is stable (won't change on re-renders)
+- Good for form handling with multiple fields
