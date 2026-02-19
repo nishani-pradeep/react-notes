@@ -489,3 +489,147 @@ function Counter() {
 - Can pass payload in action: `dispatch({ type: 'add', payload: value })`
 - `dispatch` function identity is stable (won't change on re-renders)
 - Good for form handling with multiple fields
+
+---
+
+## useCallback
+
+`useCallback` is used to memoize functions so they keep the same reference across re-renders. This prevents unnecessary re-renders of child components.
+
+### Basic Syntax:
+```javascript
+const memoizedCallback = useCallback(() => {
+  // Your function logic
+}, [dependencies]);
+```
+
+### The Problem Without useCallback:
+
+```javascript
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  // ❌ New function created on EVERY render
+  const handleClick = () => {
+    console.log('Clicked!');
+  };
+
+  return (
+    <div>
+      <Child onClick={handleClick} />
+      <button onClick={() => setCount(count + 1)}>Count: {count}</button>
+    </div>
+  );
+}
+
+const Child = React.memo(({ onClick }) => {
+  console.log('Child rendered'); // Logs on every parent re-render!
+  return <button onClick={onClick}>Click me</button>;
+});
+```
+
+**Problem:** Even though `Child` is wrapped with `React.memo`, it still re-renders every time because `handleClick` is a new function on each render (different reference).
+
+### The Solution With useCallback:
+
+```javascript
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  // ✅ Same function reference across re-renders
+  const handleClick = useCallback(() => {
+    console.log('Clicked!');
+  }, []); // Dependencies array
+
+  return (
+    <div>
+      <Child onClick={handleClick} />
+      <button onClick={() => setCount(count + 1)}>Count: {count}</button>
+    </div>
+  );
+}
+
+const Child = React.memo(({ onClick }) => {
+  console.log('Child rendered'); // Only logs when onClick actually changes
+  return <button onClick={onClick}>Click me</button>;
+});
+```
+
+**Solution:** `useCallback` returns the same function reference unless dependencies change, so `Child` doesn't re-render unnecessarily.
+
+### Key Use Cases:
+
+**1. Passing callbacks to memoized child components:**
+```javascript
+const MemoizedChild = React.memo(Child);
+
+function Parent() {
+  const handleClick = useCallback(() => {
+    // Do something
+  }, []);
+
+  return <MemoizedChild onClick={handleClick} />;
+}
+```
+
+**2. Function is a dependency of useEffect:**
+```javascript
+function SearchComponent() {
+  const [query, setQuery] = useState('');
+
+  const fetchData = useCallback(() => {
+    fetch(`/api/search?q=${query}`)
+      .then(res => res.json())
+      .then(data => console.log(data));
+  }, [query]); // Only recreate when query changes
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]); // Won't cause infinite loops
+}
+```
+
+**3. Function passed to custom hooks:**
+```javascript
+function useDebounce(callback, delay) {
+  useEffect(() => {
+    const timer = setTimeout(callback, delay);
+    return () => clearTimeout(timer);
+  }, [callback, delay]); // callback should be stable
+}
+
+function Component() {
+  const handleSearch = useCallback(() => {
+    // Search logic
+  }, []);
+
+  useDebounce(handleSearch, 500);
+}
+```
+
+### When NOT to Use useCallback:
+
+- Function is not passed to child components
+- Function is not used in dependencies
+- Premature optimization (adds overhead)
+- Simple event handlers that aren't causing performance issues
+
+```javascript
+// ❌ Unnecessary - not passed to children or used in deps
+const handleClick = useCallback(() => {
+  console.log('clicked');
+}, []);
+
+// ✅ Just use regular function
+const handleClick = () => {
+  console.log('clicked');
+};
+```
+
+### Key Points:
+- useCallback memoizes the function itself
+- Returns same function reference if dependencies haven't changed
+- Prevents unnecessary re-renders of child components
+- Use with React.memo for optimization
+- Don't overuse - has its own overhead
+- Different from useMemo: `useCallback(fn, deps)` is equivalent to `useMemo(() => fn, deps)`

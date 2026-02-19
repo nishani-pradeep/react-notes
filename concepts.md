@@ -102,3 +102,18 @@ For detailed documentation on React Hooks, see [react-hooks.md](./react-hooks.md
 - **useRef** - Refs and mutable values without re-renders
 - **useContext** - Context consumption without prop drilling
 - **useReducer** - Complex state management with reducer pattern
+
+---
+
+## Authentication & Security
+
+For comprehensive guide on authentication methods and security best practices, see [login_flow.md](./login_flow.md)
+
+**Covered topics:**
+- **Session-Based Authentication** - Traditional server-side sessions with cookies
+- **JWT (JSON Web Tokens)** - Stateless token-based authentication
+- **OAuth 2.0** - Third-party authentication (Login with Google/GitHub)
+- **Multi-Factor Authentication (MFA)** - Enhanced security with 2FA/TOTP
+- **Passwordless Authentication** - Magic links and OTP
+- **Advanced Security** - Risk-based auth, device fingerprinting, biometrics
+- **Security Best Practices** - Password hashing, token storage, rate limiting
